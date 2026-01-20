@@ -1,0 +1,87 @@
+<%- include('partials/header') %>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white text-center py-3">
+                    <h3 class="mb-0 font-serif">Saati Düzenle</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form action="/products/<%= product.id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-bold">Saat Adı</label>
+                            <input type="text" class="form-control" id="name" name="name" value="<%= product.name %>" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="brand" class="form-label fw-bold">Marka</label>
+                                <input type="text" class="form-control" id="brand" name="brand" value="<%= product.brand %>" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="category" class="form-label fw-bold">Kategori</label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="Classic" <%= product.category === 'Classic' ? 'selected' : '' %>>Klasik</option>
+                                    <option value="Sport" <%= product.category === 'Sport' ? 'selected' : '' %>>Spor</option>
+                                    <option value="Luxury" <%= product.category === 'Luxury' ? 'selected' : '' %>>Lüks</option>
+                                    <option value="Smart" <%= product.category === 'Smart' ? 'selected' : '' %>>Akıllı</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="gender" class="form-label fw-bold">Cinsiyet</label>
+                                <select class="form-select" id="gender" name="gender">
+                                    <option value="Men" <%= product.gender === 'Men' ? 'selected' : '' %>>Erkek</option>
+                                    <option value="Women" <%= product.gender === 'Women' ? 'selected' : '' %>>Kadın</option>
+                                    <option value="Unisex" <%= product.gender === 'Unisex' ? 'selected' : '' %>>Unisex</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="price" class="form-label fw-bold">Fiyat ($)</label>
+                                <input type="number" class="form-control" id="price" name="price" value="<%= product.price %>" required min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="stock" class="form-label fw-bold">Stok Adedi</label>
+                                <input type="number" class="form-control" id="stock" name="stock" value="<%= product.stock %>" required min="0">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="image" class="form-label fw-bold">Ürün Görseli</label>
+                            <div class="mb-2">
+                                <img src="<%= product.image %>" alt="Current Image" style="height: 100px; border-radius: 5px;" class="border">
+                                <small class="text-muted d-block">Mevcut Görsel</small>
+                            </div>
+                            <label class="small text-muted mb-1">Dosya Yükle</label>
+                            <input type="file" class="form-control mb-3" id="image" name="image" accept="image/*">
+                            
+                            <label class="small text-muted mb-1">Veya Görsel URL'si Girin</label>
+                            <input type="text" class="form-control" name="image_url" placeholder="https://..." value="<%= product.image.startsWith('http') ? product.image : '' %>">
+                            <div class="form-text">Değiştirmek istemiyorsanız boş bırakın.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-bold">Açıklama</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" required><%= product.description %></textarea>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="featured" name="featured" value="true" <%= product.featured ? 'checked' : '' %>>
+                            <label class="form-check-label" for="featured">Ana Sayfada Göster</label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning text-white fw-bold">Güncelle</button>
+                            <a href="/products/<%= product.id %>" class="btn btn-outline-secondary">İptal</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

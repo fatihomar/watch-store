@@ -1,0 +1,7 @@
+node_modules/
+.env
+.DS_Store
+database.sqlite
+public/uploads/*
+!public/uploads/.gitkeep
+thumbs.db

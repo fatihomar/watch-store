@@ -1,0 +1,423 @@
+<%- include('partials/header') %>
+
+<div class="container py-5 my-5">
+    <div class="row g-5">
+        <!-- Product Image (Zoom) -->
+        <div class="col-md-6 sticky-top" style="top: 20px; z-index: 1;">
+            <div class="bg-white p-5 rounded-0 border-0 shadow-sm text-center position-relative overflow-hidden zoom-container" style="cursor: zoom-in;">
+                <img src="<%= product.image %>" alt="<%= product.name %>" class="img-fluid zoom-img" style="max-height: 500px; object-fit: contain; transition: transform 0.5s ease;">
+            </div>
+            <div class="text-center mt-3 text-muted small">
+                <i class="fas fa-search-plus me-1"></i> Yakınlaştırmak için üzerine gelin
+            </div>
+        </div>
+        
+        <!-- Product Info -->
+        <div class="col-md-6">
+            <div class="ps-lg-4">
+                <p class="text-uppercase text-gold fw-bold mb-2 letter-spacing-2"><%= product.brand %> / <%= product.category %></p>
+                <h1 class="display-4 fw-bold font-serif mb-3"><%= product.name %></h1>
+                <div class="d-flex align-items-center mb-4">
+                     <h2 class="text-dark fw-bold mb-0 me-3">$<%= product.price.toLocaleString() %></h2>
+                     <div class="text-warning small" title="Rating: <%= product.averageRating %>">
+                         <% for(let i = 1; i <= 5; i++) { %>
+                             <% if(i <= Math.round(product.averageRating)) { %>
+                                 <i class="fas fa-star"></i>
+                             <% } else { %>
+                                 <i class="far fa-star"></i>
+                             <% } %>
+                         <% } %>
+                         <span class="text-muted ms-1">(<%= product.reviews.length %> Reviews)</span>
+                     </div>
+                </div>
+
+                <p class="lead text-muted mb-5" style="line-height: 1.8;"><%= product.description %></p>
+                
+                <!-- Stock Status -->
+                <% if(product.stock > 0) { %>
+                    <% if(product.stock <= 5) { %>
+                        <p class="text-danger fw-bold mb-3"><i class="fas fa-fire me-1"></i> Acele edin! Stokta sadece <%= product.stock %> adet kaldı.</p>
+                    <% } else { %>
+                         <p class="text-success fw-bold mb-3"><i class="fas fa-check-circle me-1"></i> Stokta Var</p>
+                    <% } %>
+                <% } else { %>
+                     <p class="text-muted fw-bold mb-3"><i class="fas fa-times-circle me-1"></i> Tükendi</p>
+                <% } %>
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-3 mb-5 position-relative">
+                    <% if(product.stock > 0) { %>
+                        <button class="btn btn-dark btn-lg rounded-0 px-5 flex-grow-1 py-3 text-uppercase fw-bold" id="addToCartBtn" onclick="addToCart(event, '<%= product.id %>')">Sepete Ekle</button>
+                    <% } else { %>
+                         <button class="btn btn-secondary btn-lg rounded-0 px-5 flex-grow-1 py-3 text-uppercase fw-bold" disabled>Tükendi</button>
+                    <% } %>
+                    <!-- Enhanced Favorite Button -->
+                    <button class="btn btn-outline-dark btn-lg rounded-circle px-0" style="width: 58px; height: 58px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" id="favBtn" onclick="toggleFavorite(event, '<%= product.id %>')">
+                        <i class="far fa-heart fs-4" id="favIcon" style="transition: transform 0.2s;"></i>
+                    </button>
+                </div>
+
+                <!-- Tabs -->
+                <ul class="nav nav-tabs nav-fill mb-4 border-bottom" id="productTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active text-uppercase fw-bold text-dark rounded-0 border-0 border-bottom border-dark" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs" type="button" role="tab" aria-selected="true">Özellikler</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-uppercase fw-bold text-muted rounded-0 border-0" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc" type="button" role="tab" aria-selected="false">Yorumlar</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-uppercase fw-bold text-muted rounded-0 border-0" id="shipping-tab" data-bs-toggle="tab" data-bs-target="#shipping" type="button" role="tab" aria-selected="false">Teslimat</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="productTabContent">
+                    <div class="tab-pane fade show active" id="specs" role="tabpanel" aria-labelledby="specs-tab">
+                        <table class="table table-borderless table-sm text-muted">
+                            <tbody>
+                                <tr>
+                                    <th scope="row" class="text-dark">Mekanizma</th>
+                                    <td><%= product.specs && product.specs.mechanism ? product.specs.mechanism : 'Otomatik' %></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="text-dark">Kasa Çapı</th>
+                                    <td><%= product.specs && product.specs.caseSize ? product.specs.caseSize : '41mm' %></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="text-dark">Materyal</th>
+                                    <td><%= product.specs && product.specs.material ? product.specs.material : 'Paslanmaz Çelik' %></td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="text-dark">Su Geçirmezlik</th>
+                                    <td><%= product.specs && product.specs.waterResistance ? product.specs.waterResistance : '10 ATM' %></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade" id="desc" role="tabpanel" aria-labelledby="desc-tab">
+                        <!-- Review Form -->
+                        <div class="mb-4 bg-light p-4 rounded">
+                            <h5 class="fw-bold mb-3">Yorum Ekle</h5>
+                            <form action="/products/<%= product.id %>/review" method="POST">
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">Puanınız</label>
+                                    <div class="rating-input">
+                                        <input type="radio" name="rating" value="5" id="star5" required><label for="star5">☆</label>
+                                        <input type="radio" name="rating" value="4" id="star4"><label for="star4">☆</label>
+                                        <input type="radio" name="rating" value="3" id="star3"><label for="star3">☆</label>
+                                        <input type="radio" name="rating" value="2" id="star2"><label for="star2">☆</label>
+                                        <input type="radio" name="rating" value="1" id="star1"><label for="star1">☆</label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">İsminiz (Opsiyonel)</label>
+                                    <input type="text" name="user" class="form-control form-control-sm rounded-0" placeholder="İsimsiz">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">Yorumunuz</label>
+                                    <textarea name="comment" class="form-control form-control-sm rounded-0" rows="2" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-dark btn-sm rounded-0 px-4">Gönder</button>
+                            </form>
+                        </div>
+                        
+                        <!-- Reviews List -->
+                        <% if(product.reviews && product.reviews.length > 0) { %>
+                            <% product.reviews.reverse().forEach(review => { %>
+                                <div class="mb-3 border-bottom pb-3">
+                                    <div class="d-flex justify-content-between">
+                                        <strong class="small"><%= review.user %></strong>
+                                        <small class="text-muted"><%= new Date(review.date).toLocaleDateString() %></small>
+                                    </div>
+                                    <div class="text-warning small mb-1">
+                                        <% for(let i=0; i<review.rating; i++) { %>★<% } %>
+                                        <% for(let i=0; i<5-review.rating; i++) { %>☆<% } %>
+                                    </div>
+                                    <p class="small text-muted mb-0"><%= review.comment %></p>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <p class="text-muted small">Henüz yorum yapılmamış.</p>
+                        <% } %>
+                    </div>
+                    <div class="tab-pane fade" id="shipping" role="tabpanel" aria-labelledby="shipping-tab">
+                         <div class="d-flex align-items-center mb-3">
+                             <i class="fas fa-truck text-dark me-3 fs-4"></i>
+                             <div>
+                                 <h6 class="mb-0 fw-bold">Ücretsiz Kargo</h6>
+                                 <small class="text-muted">Tüm siparişlerde geçerli</small>
+                             </div>
+                         </div>
+                         <div class="d-flex align-items-center">
+                             <i class="fas fa-undo text-dark me-3 fs-4"></i>
+                             <div>
+                                 <h6 class="mb-0 fw-bold">30 Gün İade</h6>
+                                 <small class="text-muted">Memnun kalmazsanız paranız iade</small>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+
+                <!-- Admin -->
+                 <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+                     <div class="mt-5 pt-4 border-top">
+                        <a href="/products/<%= product.id %>/edit" class="btn btn-sm btn-link text-muted px-0">Düzenle</a>
+                        <form action="/products/<%= product.id %>?_method=DELETE" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-link text-danger ms-3" onclick="return confirm('Emin misiniz?')">Sil</button>
+                        </form>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    <% if(typeof relatedProducts !== 'undefined' && relatedProducts.length > 0) { %>
+    <div class="row mt-5 pt-5 border-top">
+        <div class="col-12 text-center mb-5">
+            <h3 class="font-serif fw-bold">Bunları da Beğenebilirsiniz</h3>
+        </div>
+        <% relatedProducts.forEach(relProduct => { %>
+            <div class="col-6 col-md-3">
+                <div class="card border-0 h-100 product-card">
+                    <a href="/products/<%= relProduct.id %>" class="text-decoration-none">
+                        <div class="position-relative overflow-hidden rounded bg-light p-3 mb-3 text-center">
+                            <img src="<%= relProduct.image %>" alt="<%= relProduct.name %>" class="img-fluid" style="height: 180px; object-fit: contain;">
+                        </div>
+                        <div class="text-center">
+                            <h6 class="text-dark fw-bold mb-1"><%= relProduct.name %></h6>
+                            <p class="text-muted small mb-2"><%= relProduct.brand %></p>
+                            <span class="text-gold fw-bold">$<%= relProduct.price.toLocaleString() %></span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+    <% } %>
+</div>
+
+<!-- Toast Notification Container -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="favToast" class="toast align-items-center text-white bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body fs-6" id="toastMessage">
+                <i class="fas fa-heart text-danger me-2"></i> Favorilere eklendi!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .letter-spacing-2 { letter-spacing: 2px; }
+    
+    .zoom-container:hover .zoom-img {
+        transform: scale(1.5);
+    }
+
+    /* Tabs Override */
+    .nav-tabs .nav-link.active {
+        background-color: transparent;
+        color: #000 !important;
+    }
+    .nav-tabs .nav-link {
+        color: #6c757d;
+    }
+    .nav-tabs .nav-link:hover {
+        border-color: transparent transparent #dee2e6;
+        isolation: isolate;
+    }
+
+    /* Rating Star CSS */
+    .rating-input {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+    .rating-input input {
+        display: none;
+    }
+    .rating-input label {
+        font-size: 24px;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    .rating-input label:hover,
+    .rating-input label:hover ~ label,
+    .rating-input input:checked ~ label {
+        color: #ffc107;
+    }
+
+    /* Keep Animation Styles */
+    @keyframes heartbeat {
+        0% { transform: scale(1); }
+        14% { transform: scale(1.3); }
+        28% { transform: scale(1); }
+        42% { transform: scale(1.3); }
+        70% { transform: scale(1); }
+    }
+    .heart-anim {
+        animation: heartbeat 1.5s linear infinite;
+    }
+    .btn-pressed {
+        transform: scale(0.95) !important;
+    }
+    .flying-heart {
+        position: fixed;
+        z-index: 9999;
+        pointer-events: none;
+        font-size: 24px;
+        color: #dc3545;
+        transition: all 0.8s ease-in-out;
+    }
+</style>
+
+<script>
+    function toggleFavorite(event, productId) {
+        let favorites = JSON.parse(localStorage.getItem('saat_favorites') || '[]');
+        const index = favorites.indexOf(productId);
+        const btn = document.getElementById('favBtn');
+        const icon = document.getElementById('favIcon');
+
+        // Button Click Effect
+        btn.classList.add('btn-pressed');
+        setTimeout(() => btn.classList.remove('btn-pressed'), 150);
+
+        if (index === -1) {
+            // ADD
+            favorites.push(productId);
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+            icon.classList.add('text-danger');
+            
+            // Animation
+            icon.classList.add('heart-anim');
+            setTimeout(() => icon.classList.remove('heart-anim'), 1000);
+
+            // Toast
+            showToast('<i class="fas fa-heart text-danger me-2"></i> Favorilere eklendi!');
+
+            // Flying
+            createFlyingElement(btn, 'nav-favorites', 'fas fa-heart text-danger');
+
+        } else {
+            // REMOVE
+            favorites.splice(index, 1);
+            icon.classList.remove('fas');
+            icon.classList.remove('text-danger');
+            icon.classList.add('far');
+        }
+        localStorage.setItem('saat_favorites', JSON.stringify(favorites));
+    }
+
+    function addToCart(event, productId) {
+        let cart = JSON.parse(localStorage.getItem('saat_cart') || '[]');
+        const existingItem = cart.find(i => i.id === productId);
+        
+        if(existingItem) {
+            existingItem.qty += 1;
+        } else {
+            cart.push({ id: productId, qty: 1 });
+        }
+        
+        localStorage.setItem('saat_cart', JSON.stringify(cart));
+        
+        // Feedback
+        const btn = document.getElementById('addToCartBtn');
+        const originalText = btn.innerText;
+        btn.innerText = 'Eklendi!';
+        btn.classList.remove('btn-dark');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.classList.add('btn-dark');
+            btn.classList.remove('btn-success');
+        }, 1000);
+
+        // Toast
+        showToast('<i class="fas fa-shopping-bag text-warning me-2"></i> Sepete eklendi!');
+        
+        // Flying
+        createFlyingElement(btn, 'nav-cart', 'fas fa-shopping-bag text-dark');
+        
+        updateCartBadge();
+    }
+
+    function showToast(html) {
+        const toastEl = document.getElementById('favToast');
+        document.getElementById('toastMessage').innerHTML = html;
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+    }
+
+    function createFlyingElement(sourceBtn, targetId, iconClass) {
+        const rect = sourceBtn.getBoundingClientRect();
+        const targetBtn = document.getElementById(targetId);
+        if(!targetBtn) return;
+        
+        const targetRect = targetBtn.getBoundingClientRect();
+
+        const flyer = document.createElement('i');
+        flyer.className = iconClass + ' flying-heart';
+        flyer.style.top = `${rect.top + rect.height/2 - 12}px`;
+        flyer.style.left = `${rect.left + rect.width/2 - 12}px`;
+        
+        if(sourceBtn.tagName === 'BUTTON' && sourceBtn.offsetWidth > 100) {
+             flyer.style.left = `${event.clientX}px`;
+             flyer.style.top = `${event.clientY}px`;
+        }
+        
+        document.body.appendChild(flyer);
+        flyer.getBoundingClientRect(); // Reflow
+
+        flyer.style.top = `${targetRect.top + targetRect.height/2}px`;
+        flyer.style.left = `${targetRect.left + targetRect.width/2}px`;
+        flyer.style.opacity = '0';
+        flyer.style.transform = 'scale(0.5)';
+
+        setTimeout(() => {
+            flyer.remove();
+            targetBtn.style.transform = 'scale(1.2)';
+            setTimeout(() => targetBtn.style.transform = 'scale(1)', 200);
+            updateCartBadge();
+        }, 800);
+    }
+    
+    function updateCartBadge() {
+        let cart = JSON.parse(localStorage.getItem('saat_cart') || '[]');
+        const badge = document.getElementById('cartBadge');
+        if(badge) {
+            badge.innerText = cart.length;
+            badge.classList.toggle('d-none', cart.length === 0);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const favorites = JSON.parse(localStorage.getItem('saat_favorites') || '[]');
+        const productId = '<%= product.id %>';
+        const icon = document.getElementById('favIcon');
+        
+        if (favorites.includes(productId)) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+            icon.classList.add('text-danger');
+        }
+        updateCartBadge();
+        
+        // Init Move Logic for Zoom
+        const zoomContainer = document.querySelector('.zoom-container');
+        const zoomImg = document.querySelector('.zoom-img');
+        
+        zoomContainer.addEventListener('mousemove', function(e) {
+            const { left, top, width, height } = this.getBoundingClientRect();
+            const x = (e.clientX - left) / width;
+            const y = (e.clientY - top) / height;
+            
+            // Move origin
+            zoomImg.style.transformOrigin = `${x * 100}% ${y * 100}%`;
+        });
+    });
+</script>
+
+<%- include('partials/footer') %>

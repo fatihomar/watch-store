@@ -1,0 +1,152 @@
+<%- include('partials/header') %>
+
+<div class="container-fluid py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/dashboard">
+                            <i class="fas fa-box me-2"></i>
+                            Ürünler
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active fw-bold" href="/admin/orders">
+                            <i class="fas fa-shopping-cart me-2"></i>
+                            Siparişler
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products/new">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            Yeni Ürün Ekle
+                        </a>
+                    </li>
+                    <li class="nav-item mt-4">
+                        <a class="nav-link text-danger" href="/admin/logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            Çıkış Yap
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Sipariş Yönetimi</h1>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#ID</th>
+                            <th>Müşteri</th>
+                            <th>Tutar</th>
+                            <th>Durum</th>
+                            <th>Tarih</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if(orders && orders.length > 0) { %>
+                            <% orders.forEach(order => { %>
+                                <tr>
+                                    <td><strong>#TR-<%= order.id %></strong></td>
+                                    <td>
+                                        <%= order.customerName %><br>
+                                        <small class="text-muted"><%= order.customerEmail %></small>
+                                    </td>
+                                    <td>$<%= order.totalAmount.toLocaleString() %></td>
+                                    <td>
+                                        <% if(order.status === 'Pending') { %>
+                                            <span class="badge bg-warning text-dark">Bekliyor</span>
+                                        <% } else if(order.status === 'Shipped') { %>
+                                            <span class="badge bg-info">Kargoda</span>
+                                        <% } else if(order.status === 'Delivered') { %>
+                                            <span class="badge bg-success">Teslim Edildi</span>
+                                        <% } else { %>
+                                            <span class="badge bg-secondary"><%= order.status %></span>
+                                        <% } %>
+                                    </td>
+                                    <td><%= new Date(order.createdAt).toLocaleDateString('tr-TR') %></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#orderModal<%= order.id %>">
+                                            Detaylar
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Modal Details -->
+                                <div class="modal fade" id="orderModal<%= order.id %>" tabindex="-1">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Sipariş Detayı #TR-<%= order.id %></h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="mb-4 p-3 bg-light rounded">
+                                                    <form action="/admin/orders/<%= order.id %>/status" method="POST" class="row g-2 align-items-center">
+                                                        <div class="col-auto">
+                                                            <label class="fw-bold">Durum Güncelle:</label>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <select name="status" class="form-select form-select-sm">
+                                                                <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Bekliyor</option>
+                                                                <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Kargoya Verildi</option>
+                                                                <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Teslim Edildi</option>
+                                                                <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>İptal Edildi</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <button type="submit" class="btn btn-sm btn-success">Güncelle</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+
+                                                <h6>Teslimat Adresi:</h6>
+                                                <p><%= order.customerAddress %></p>
+                                                <hr>
+                                                <h6>Ürünler:</h6>
+                                                <ul class="list-group mb-3">
+                                                    <% const items = JSON.parse(order.items || '[]'); %>
+                                                    <% items.forEach(item => { %>
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <%= item.name %>
+                                                                <span class="badge bg-primary rounded-pill ms-2">x<%= item.qty %></span>
+                                                            </div>
+                                                            <span>$<%= (item.price * item.qty).toLocaleString() %></span>
+                                                        </li>
+                                                    <% }); %>
+                                                    <li class="list-group-item d-flex justify-content-between active">
+                                                        <span>Toplam</span>
+                                                        <strong>$<%= order.totalAmount.toLocaleString() %></strong>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6" class="text-center py-5">Henüz hiç sipariş yok.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,284 @@
+<%- include('partials/header') %>
+
+<div class="bg-light py-5">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-md-5 col-lg-4 order-md-last">
+                <h4 class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-primary">Sepetiniz</span>
+                    <span class="badge bg-primary rounded-pill" id="cartCount">0</span>
+                </h4>
+                <ul class="list-group mb-3 shadow-sm" id="orderSummary">
+                    <!-- Items will be injected here -->
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Toplam (USD)</span>
+                        <strong id="orderTotal">$0</strong>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-7 col-lg-8">
+                <h4 class="mb-3">Fatura Adresi</h4>
+                <form class="needs-validation" novalidate onsubmit="handleCheckout(event)">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label for="firstName" class="form-label">Ad</label>
+                            <input type="text" class="form-control" id="firstName" required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="lastName" class="form-label">Soyad</label>
+                            <input type="text" class="form-control" id="lastName" required>
+                        </div>
+                        <div class="col-12">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" placeholder="you@example.com">
+                        </div>
+                        <div class="col-12">
+                            <label for="address" class="form-label">Adres</label>
+                            <input type="text" class="form-control" id="address" placeholder="1234 Main St" required>
+                        </div>
+                        <div class="col-md-5">
+                            <label for="country" class="form-label">Ülke</label>
+                            <select class="form-select" id="country" onchange="loadStates()" required>
+                                <option value="">Seçiniz...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="state" class="form-label">Şehir / Eyalet</label>
+                            <select class="form-select" id="state" required>
+                                <option value="">Önce Ülke Seçiniz...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="zip" class="form-label">Posta Kodu</label>
+                            <input type="text" class="form-control" id="zip" required>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h4 class="mb-3">Ödeme</h4>
+                    <div class="my-3">
+                        <div class="form-check">
+                            <input id="credit" name="paymentMethod" type="radio" class="form-check-input" checked required>
+                            <label class="form-check-label" for="credit">Kredi Kartı</label>
+                        </div>
+                        <div class="form-check">
+                            <input id="debit" name="paymentMethod" type="radio" class="form-check-input" required>
+                            <label class="form-check-label" for="debit">Banka Kartı</label>
+                        </div>
+                    </div>
+
+                    <div class="row gy-3">
+                        <div class="col-md-6">
+                            <label for="cc-name" class="form-label">Kart Üzerindeki İsim</label>
+                            <input type="text" class="form-control" id="cc-name" required>
+                            <small class="text-muted">Kart üzerinde yazıldığı gibi</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="cc-number" class="form-label">Kart Numarası</label>
+                            <input type="text" class="form-control" id="cc-number" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="cc-expiration" class="form-label">Son Kullanma</label>
+                            <input type="text" class="form-control" id="cc-expiration" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="cc-cvv" class="form-label">CVV</label>
+                            <input type="text" class="form-control" id="cc-cvv" required>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <button class="w-100 btn btn-dark btn-lg py-3 rounded-0" type="submit">Ödemeyi Tamamla</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-5">
+      <div class="mb-4">
+          <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+      </div>
+      <h3>Siparişiniz Alındı!</h3>
+      <p class="text-muted" id="orderIdDisplay"></p>
+      <p>Siparişiniz başarıyla oluşturuldu.</p>
+      <a href="/" class="btn btn-dark mt-3 rounded-0 px-5">Ana Sayfaya Dön</a>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Load Countries
+        try {
+            const response = await fetch('/api/countries');
+            const countries = await response.json();
+            const countrySelect = document.getElementById('country');
+            
+            countries.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c.isoCode; // Store ISO code for state lookup
+                option.text = c.name; // Display Name
+                option.dataset.name = c.name; // Store full name for submission
+                countrySelect.appendChild(option);
+            });
+        } catch (e) {
+            console.error('Failed to load countries', e);
+        }
+
+        // Load cart summary similarly to cart page (simplified)
+        const cart = JSON.parse(localStorage.getItem('saat_cart') || '[]');
+        if(cart.length === 0) {
+            window.location.href = '/cart';
+            return;
+        }
+        
+        // Update items only to calculate total for display (Mock calculation for speed or fetch real data)
+        // For accurate display, we should fetch products. 
+        try {
+            const productIds = cart.map(item => item.id);
+            const response = await fetch('/products/batch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids: productIds })
+            });
+            const products = await response.json();
+            
+            let total = 0;
+            let count = 0;
+            const summaryList = document.getElementById('orderSummary');
+            // Remove existing items except total
+            summaryList.innerHTML = '';
+            
+            products.forEach(p => {
+                const item = cart.find(i => i.id == p.id);
+                if(item) {
+                     const itemTotal = p.price * item.qty;
+                     total += itemTotal;
+                     count += item.qty;
+                     
+                     const li = document.createElement('li');
+                     li.className = 'list-group-item d-flex justify-content-between lh-sm';
+                     li.innerHTML = `
+                        <div>
+                            <h6 class="my-0">${p.name}</h6>
+                            <small class="text-muted">x ${item.qty}</small>
+                        </div>
+                        <span class="text-muted">$${itemTotal.toLocaleString()}</span>
+                     `;
+                     summaryList.appendChild(li);
+                }
+            });
+            
+            // Re-add total
+            const totalLi = document.createElement('li');
+            totalLi.className = 'list-group-item d-flex justify-content-between';
+            totalLi.innerHTML = `<span>Toplam (USD)</span><strong id="orderTotal">$${total.toLocaleString()}</strong>`;
+            summaryList.appendChild(totalLi);
+            
+            document.getElementById('cartCount').innerText = count;
+
+        } catch (e) {
+            console.error(e);
+        }
+    });
+
+    async function loadStates() {
+        const countrySelect = document.getElementById('country');
+        const stateSelect = document.getElementById('state');
+        const countryCode = countrySelect.value;
+        
+        stateSelect.innerHTML = '<option value="">Yükleniyor...</option>';
+        stateSelect.disabled = true;
+
+        if(!countryCode) {
+            stateSelect.innerHTML = '<option value="">Önce Ülke Seçiniz...</option>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/states/${countryCode}`);
+            const states = await response.json();
+            
+            stateSelect.innerHTML = '<option value="">Seçiniz...</option>';
+            
+            if (states.length === 0) {
+                 stateSelect.innerHTML = '<option value="-">N/A</option>'; // For countries with no states
+            } else {
+                states.forEach(s => {
+                    const option = document.createElement('option');
+                    option.value = s.name;
+                    option.text = s.name;
+                    stateSelect.appendChild(option);
+                });
+            }
+            stateSelect.disabled = false;
+        } catch (e) {
+            console.error(e);
+            stateSelect.innerHTML = '<option value="">Hata!</option>';
+        }
+    }
+
+    async function handleCheckout(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        if (!form.checkValidity()) {
+            e.stopPropagation();
+            form.classList.add('was-validated');
+            return;
+        }
+
+        const btn = form.querySelector('button[type="submit"]');
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = 'İşleniyor...';
+
+        try {
+            const cart = JSON.parse(localStorage.getItem('saat_cart') || '[]');
+            const orderTotalText = document.getElementById('orderTotal').innerText.replace('$', '').replace(/,/g, '');
+            
+            const formData = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                email: document.getElementById('email').value,
+                address: document.getElementById('address').value,
+                country: document.getElementById('country').options[document.getElementById('country').selectedIndex].text,
+                state: document.getElementById('state').value,
+                zip: document.getElementById('zip').value,
+                cartItems: cart,
+                totalAmount: orderTotalText
+            };
+
+            const response = await fetch('/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                localStorage.removeItem('saat_cart');
+                window.location.href = `/order-success/${result.orderId}`;
+            } else {
+                alert(result.error || 'Bir hata oluştu.');
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Bir bağlantı hatası oluştu.');
+            btn.disabled = false;
+            btn.innerText = originalText;
+        }
+    }
+</script>
+
+<%- include('partials/footer') %>

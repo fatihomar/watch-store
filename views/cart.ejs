@@ -1,0 +1,190 @@
+<%- include('partials/header') %>
+
+<div class="bg-dark text-white py-5 mb-5 header-banner">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold font-serif">Sepetim</h1>
+        <p class="lead text-white-50">Siparişinizi tamamlamaya bir adım kaldı.</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row" id="cartContainer">
+        <div class="col-12 text-center py-5">
+            <div class="spinner-border text-gold" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+    
+    <div id="emptyCart" class="text-center py-5 d-none">
+        <i class="fas fa-shopping-basket fs-1 text-muted mb-4 opacity-50"></i>
+        <p class="lead text-muted mb-4">Sepetinizde ürün bulunmamaktadır.</p>
+        <a href="/products" class="btn btn-dark rounded-0 px-4">Alışverişe Devam Et</a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const cartContainer = document.getElementById('cartContainer');
+        const emptyCart = document.getElementById('emptyCart');
+        
+        // Structure: [{id: '...', qty: 1}, ...]
+        const cart = JSON.parse(localStorage.getItem('saat_cart') || '[]');
+
+        if (cart.length === 0) {
+            cartContainer.innerHTML = '';
+            emptyCart.classList.remove('d-none');
+            return;
+        }
+
+        const productIds = cart.map(item => item.id);
+
+        try {
+            const response = await fetch('/products/batch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids: productIds })
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const products = await response.json();
+            
+            // Map products to cart items to preserve quantity
+            const cartItems = cart.map(item => {
+                const product = products.find(p => p.id == item.id);
+                return product ? { ...product, qty: item.qty } : null;
+            }).filter(item => item !== null);
+
+            renderCart(cartItems);
+
+        } catch (error) {
+            console.error('Error fetching cart:', error);
+            cartContainer.innerHTML = '<div class="col-12 text-center text-danger">Sepet yüklenirken bir hata oluştu.</div>';
+        }
+    });
+
+    function renderCart(items) {
+        if (items.length === 0) {
+            document.getElementById('cartContainer').innerHTML = '';
+            document.getElementById('emptyCart').classList.remove('d-none');
+            updateBadge(0);
+            return;
+        }
+
+        let total = 0;
+        let html = `
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="border-0 p-3">Ürün</th>
+                                        <th class="border-0 p-3">Fiyat</th>
+                                        <th class="border-0 p-3">Adet</th>
+                                        <th class="border-0 p-3">Toplam</th>
+                                        <th class="border-0 p-3"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+        `;
+
+        items.forEach((item, index) => {
+            const itemTotal = item.price * item.qty;
+            total += itemTotal;
+            html += `
+                <tr>
+                    <td class="p-3">
+                        <div class="d-flex align-items-center">
+                            <img src="${item.image}" alt="${item.name}" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                            <div>
+                                <h6 class="mb-0 fw-bold">${item.name}</h6>
+                                <small class="text-muted">${item.brand}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-3">$${item.price.toLocaleString()}</td>
+                    <td class="p-3">
+                        <div class="input-group input-group-sm" style="width: 100px;">
+                            <button class="btn btn-outline-secondary" onclick="updateQty('${item.id}', -1)">-</button>
+                            <input type="text" class="form-control text-center" value="${item.qty}" readonly>
+                            <button class="btn btn-outline-secondary" onclick="updateQty('${item.id}', 1)">+</button>
+                        </div>
+                    </td>
+                    <td class="p-3 fw-bold">$${itemTotal.toLocaleString()}</td>
+                    <td class="p-3 text-end">
+                        <button class="btn btn-link text-danger p-0" onclick="removeFromCart('${item.id}')"><i class="fas fa-trash-alt"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm bg-light">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">Sipariş Özeti</h5>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Ara Toplam</span>
+                            <span>$${total.toLocaleString()}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="text-muted">Kargo</span>
+                            <span class="text-success">Ücretsiz</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="fw-bold fs-5">Toplam</span>
+                            <span class="fw-bold fs-5 text-gold">$${total.toLocaleString()}</span>
+                        </div>
+                        <a href="/checkout" class="btn btn-dark w-100 rounded-0 py-3 text-uppercase fw-bold">Ödemeye Geç</a>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('cartContainer').innerHTML = html;
+        updateBadge(items.length);
+    }
+
+    function updateQty(id, change) {
+        let cart = JSON.parse(localStorage.getItem('saat_cart') || '[]');
+        const item = cart.find(i => i.id == id);
+        
+        if (item) {
+            item.qty += change;
+            if (item.qty <= 0) {
+                cart = cart.filter(i => i.id != id);
+            }
+            localStorage.setItem('saat_cart', JSON.stringify(cart));
+            location.reload(); // Simple reload to refresh state
+        }
+    }
+
+    function removeFromCart(id) {
+        if(!confirm('Ürünü sepetten çıkarmak istediğinize emin misiniz?')) return;
+        let cart = JSON.parse(localStorage.getItem('saat_cart') || '[]');
+        cart = cart.filter(i => i.id != id);
+        localStorage.setItem('saat_cart', JSON.stringify(cart));
+        location.reload();
+    }
+    
+    function updateBadge(count) {
+        // This is handled globally usually, but for now:
+        const badge = document.getElementById('cartBadge');
+        if(badge) {
+            badge.innerText = count;
+            badge.classList.toggle('d-none', count === 0);
+        }
+    }
+</script>
+
+<%- include('partials/footer') %>

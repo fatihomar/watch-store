@@ -1,0 +1,70 @@
+<%- include('partials/header') %>
+
+<!-- Hero Section -->
+<header class="hero-section text-white text-center position-relative">
+    <div class="container position-relative z-2" data-aos="fade-up">
+        <h1 class="display-1 fw-bold text-uppercase mb-4" style="letter-spacing: 5px;">Zamansız <span class="text-gold">Lüks</span></h1>
+        <p class="lead fs-4 mb-5 mx-auto" style="max-width: 700px;">İsviçre tasarımı timepieces özel koleksiyonumuzu keşfedin. Her saniyede mükemmellik.</p>
+        <a href="/products" class="btn btn-warning btn-lg px-5 py-3 text-uppercase rounded-0 fw-bold box-shadow">Koleksiyonu İncele</a>
+    </div>
+</header>
+
+<!-- Featured Section -->
+<section class="py-5 bg-white">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="text-uppercase fw-bold display-5">Öne Çıkan Saatler</h2>
+            <div class="mx-auto bg-warning mb-4" style="width: 60px; height: 3px;"></div>
+        </div>
+
+        <div class="row g-4">
+            <% if(featuredProducts && featuredProducts.length > 0) { %>
+                <% featuredProducts.forEach(product => { %>
+                    <div class="col-md-4">
+
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="position-relative overflow-hidden">
+                                <img src="<%= product.image %>" class="card-img-top" alt="<%= product.name %>" style="height: 350px; object-fit: cover;">
+                            </div>
+                            <div class="card-body text-center p-4">
+                                <h5 class="card-title fw-bold text-uppercase user-select-none"><%= product.brand %></h5>
+                                <h4 class="card-text mb-3" style="font-family: 'Playfair Display', serif;"><%= product.name %></h4>
+                                <p class="text-muted fw-bold fs-5 text-gold">$<%= product.price.toLocaleString() %></p>
+                                <a href="/products/<%= product.id %>" class="btn btn-outline-dark rounded-0 px-4 mt-2">Detayları Gör</a>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="col-12 text-center">
+                    <p class="text-muted">Şu anda öne çıkan ürün bulunmamaktadır.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<!-- Values Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center g-4">
+            <div class="col-md-4">
+                <i class="fas fa-certificate fa-3x text-gold mb-3"></i>
+                <h4 class="text-uppercase">Orijinal</h4>
+                <p class="text-muted">Üreticiler tarafından sertifikalandırılmış %100 Orijinal saatler.</p>
+            </div>
+            <div class="col-md-4">
+                <i class="fas fa-shipping-fast fa-3x text-gold mb-3"></i>
+                <h4 class="text-uppercase">Hızlı Teslimat</h4>
+                <p class="text-muted">Sigortalı ve takipli küresel kargo.</p>
+            </div>
+            <div class="col-md-4">
+                <i class="fas fa-shield-alt fa-3x text-gold mb-3"></i>
+                <h4 class="text-uppercase">Garanti</h4>
+                <p class="text-muted">Tüm ürünlerimizde kapsamlı garanti.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<%- include('partials/footer') %>

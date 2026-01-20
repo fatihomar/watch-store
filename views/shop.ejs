@@ -1,0 +1,76 @@
+<%- include('partials/header') %>
+
+<div class="bg-dark text-white py-5 mb-5 header-banner">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold font-serif">Koleksiyonumuz</h1>
+        <p class="lead text-white-50">Seçkin saatlerimizden oluşan geniş yelpazemize göz atın.</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row">
+        <!-- Sidebar Filter (Visual) -->
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm p-3">
+                <form action="/products" method="GET">
+                    <!-- Preserve Search Query -->
+                    <% if(typeof searchQuery !== 'undefined' && searchQuery) { %>
+                        <input type="hidden" name="q" value="<%= searchQuery %>">
+                    <% } %>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase mb-2">Kategoriler</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="category" value="" id="catAll" <%= (!currentCategory) ? 'checked' : '' %> onchange="this.form.submit()">
+                            <label class="form-check-label" for="catAll">Tümü</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="category" value="Luxury" id="catLuxury" <%= (currentCategory === 'Luxury') ? 'checked' : '' %> onchange="this.form.submit()">
+                            <label class="form-check-label" for="catLuxury">Lüks</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="category" value="Sport" id="catSport" <%= (currentCategory === 'Sport') ? 'checked' : '' %> onchange="this.form.submit()">
+                            <label class="form-check-label" for="catSport">Spor</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="category" value="Classic" id="catClassic" <%= (currentCategory === 'Classic') ? 'checked' : '' %> onchange="this.form.submit()">
+                            <label class="form-check-label" for="catClassic">Klasik</label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <a href="/products" class="btn btn-outline-secondary btn-sm rounded-0">Filtreleri Temizle</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="col-md-9">
+            <div class="row g-4">
+                <% products.forEach(product => { %>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm product-card">
+                            <div class="position-relative overflow-hidden">
+                                <img src="<%= product.image %>" class="card-img-top <%= product.stock <= 0 ? 'grayscale-img' : '' %>" alt="<%= product.name %>" style="height: 300px; object-fit: cover;">
+                                <% if(product.stock <= 0) { %>
+                                    <span class="position-absolute top-50 start-50 translate-middle bg-dark text-white px-3 py-2 fw-bold text-uppercase border border-white">TÜKENDİ</span>
+                                <% } else if(product.featured) { %>
+                                    <span class="position-absolute top-0 start-0 bg-warning text-white px-3 py-1 m-2 small fw-bold">ÖNE ÇIKAN</span>
+                                <% } %>
+                            </div>
+                            <div class="card-body text-center">
+                                <h6 class="text-uppercase text-muted small mb-2"><%= product.brand %></h6>
+                                <h5 class="card-title fw-bold font-serif mb-2"><%= product.name %></h5>
+                                <p class="text-gold fw-bold fs-5 mb-3">$<%= product.price.toLocaleString() %></p>
+                                <a href="/products/<%= product.id %>" class="btn btn-dark w-100 rounded-0">Detayları Gör</a>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

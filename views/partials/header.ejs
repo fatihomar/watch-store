@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= typeof title !== 'undefined' ? title + ' | Travis Watch Store' : 'Travis Watch Store' %></title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm p-3">
+        <div class="container">
+            <a class="navbar-brand fs-3 fw-bold text-uppercase" href="/" style="font-family: 'Playfair Display', serif; letter-spacing: 2px;">
+                <i class="fa-solid fa-clock text-warning"></i> TRAVIS
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <!-- Search Bar -->
+                    <li class="nav-item me-3">
+                        <form action="/products" method="GET" class="d-flex">
+                            <div class="input-group">
+                                <input class="form-control form-control-sm border-warning rounded-0 bg-transparent text-white placeholder-light" type="search" name="q" placeholder="Ara..." aria-label="Search" style="width: 150px;">
+                                <button class="btn btn-warning btn-sm rounded-0" type="submit"><i class="fas fa-search"></i></button>
+                            </div>
+                        </form>
+                    </li>
+
+                    <li class="nav-item"><a class="nav-link text-uppercase spacing" href="/">Ana Sayfa</a></li>
+
+                    <li class="nav-item"><a class="nav-link text-uppercase spacing" href="/products">Koleksiyon</a></li>
+                    <li class="nav-item"><a class="nav-link text-uppercase spacing" href="/about">Hakkımızda</a></li>
+                    <li class="nav-item"><a class="nav-link text-uppercase spacing" href="/favorites" id="nav-favorites"><i class="far fa-heart me-1"></i> Favorilerim</a></li>
+                    <li class="nav-item position-relative">
+                        <a class="nav-link text-uppercase spacing" href="/cart" id="nav-cart">
+                            <i class="fas fa-shopping-bag me-1"></i> Sepet
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-gold d-none" id="cartBadge" style="font-size: 0.6rem; top: 10px !important;">
+                                0
+                            </span>
+                        </a>
+                    </li>
+                    <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+                        <li class="nav-item ms-lg-3"><a class="btn btn-warning btn-sm text-uppercase px-4 rounded-0" href="/admin/dashboard">Yönetim Paneli</a></li>
+                        <li class="nav-item ms-lg-2"><a class="btn btn-outline-light btn-sm text-uppercase px-3 rounded-0" href="/admin/logout">Çıkış</a></li>
+                    <% } else { %>
+                        <li class="nav-item ms-lg-3"><a class="btn btn-outline-warning btn-sm text-uppercase px-4 rounded-0" href="/admin/login">Yönetici Girişi</a></li>
+                    <% } %>
+                </ul>
+            </div>
+        </div>
+    </nav>

@@ -1,0 +1,110 @@
+<%- include('partials/header') %>
+
+<div class="bg-dark text-white py-5 mb-5 header-banner">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold font-serif">Favorilerim</h1>
+        <p class="lead text-white-50">Beğendiğiniz saatler burada listelenir.</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row g-4" id="favoritesGrid">
+        <!-- Favorites will be loaded here dynamically -->
+        <div class="col-12 text-center py-5">
+            <div class="spinner-border text-gold" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+    <div id="noFavorites" class="text-center py-5 d-none">
+        <p class="lead text-muted">Henüz favori ürününüz yok.</p>
+        <a href="/products" class="btn btn-dark rounded-0 px-4">Alışverişe Başla</a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const favoritesGrid = document.getElementById('favoritesGrid');
+        const noFavorites = document.getElementById('noFavorites');
+        
+        // Get favorites from LocalStorage
+        const favorites = JSON.parse(localStorage.getItem('saat_favorites') || '[]');
+
+        if (favorites.length === 0) {
+            favoritesGrid.innerHTML = '';
+            noFavorites.classList.remove('d-none');
+            return;
+        }
+
+        try {
+            const response = await fetch('/products/batch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ids: favorites })
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const products = await response.json();
+
+            // Clear loading spinner
+            favoritesGrid.innerHTML = '';
+
+            if (products.length === 0) {
+                noFavorites.classList.remove('d-none');
+                return;
+            }
+
+            products.forEach(product => {
+                const col = document.createElement('div');
+                col.className = 'col-md-6 col-lg-4';
+                col.innerHTML = `
+                    <div class="card h-100 border-0 shadow-sm product-card">
+                        <div class="position-relative overflow-hidden">
+                            <img src="${product.image}" class="card-img-top" alt="${product.name}" style="height: 300px; object-fit: cover;">
+                            <button class="btn btn-danger position-absolute top-0 end-0 m-2 rounded-circle shadow-sm" onclick="removeFavorite('${product.id}', this)" title="Favorilerden Kaldır">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="card-body text-center">
+                            <h6 class="text-uppercase text-muted small mb-2">${product.brand}</h6>
+                            <h5 class="card-title fw-bold font-serif mb-2">${product.name}</h5>
+                            <p class="text-gold fw-bold fs-5 mb-3">$${product.price.toLocaleString()}</p>
+                            <a href="/products/${product.id}" class="btn btn-dark w-100 rounded-0">Detayları Gör</a>
+                        </div>
+                    </div>
+                `;
+                favoritesGrid.appendChild(col);
+            });
+
+        } catch (error) {
+            console.error('Error fetching favorites:', error);
+            favoritesGrid.innerHTML = '<div class="col-12 text-center text-danger">Favoriler yüklenirken bir hata oluştu.</div>';
+        }
+    });
+
+    function removeFavorite(id, btnElement) {
+        if(!confirm('Bu ürünü favorilerden kaldırmak istediğinize emin misiniz?')) return;
+        
+        // Remove from LocalStorage
+        let favorites = JSON.parse(localStorage.getItem('saat_favorites') || '[]');
+        favorites = favorites.filter(favId => favId !== id);
+        localStorage.setItem('saat_favorites', JSON.stringify(favorites));
+
+        // Remove element from DOM
+        const col = btnElement.closest('.col-md-6'); // Adjust selector based on structure
+        if (col) col.remove();
+
+        // Check if empty
+        if (favorites.length === 0) {
+            document.getElementById('noFavorites').classList.remove('d-none');
+        }
+        
+        // Update header count if we implement it later
+        // updateFavoriteCount(); 
+    }
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,79 @@
+<%- include('partials/header') %>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white text-center py-3">
+                    <h3 class="mb-0 font-serif">Yeni Saat Ekle</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form action="/products" method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-bold">Saat Adı</label>
+                            <input type="text" class="form-control" id="name" name="name" required placeholder="Örn: Rolex Submariner">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="brand" class="form-label fw-bold">Marka</label>
+                                <input type="text" class="form-control" id="brand" name="brand" required placeholder="Örn: Rolex">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="category" class="form-label fw-bold">Kategori</label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="Classic">Klasik</option>
+                                    <option value="Sport">Spor</option>
+                                    <option value="Luxury">Lüks</option>
+                                    <option value="Smart">Akıllı</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="gender" class="form-label fw-bold">Cinsiyet</label>
+                                <select class="form-select" id="gender" name="gender">
+                                    <option value="Men">Erkek</option>
+                                    <option value="Women">Kadın</option>
+                                    <option value="Unisex">Unisex</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="price" class="form-label fw-bold">Fiyat ($)</label>
+                                <input type="number" class="form-control" id="price" name="price" required min="0" placeholder="0.00">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="stock" class="form-label fw-bold">Stok Adedi</label>
+                                <input type="number" class="form-control" id="stock" name="stock" required min="0" value="10" placeholder="10">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="image" class="form-label fw-bold">Ürün Görseli</label>
+                            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                            <div class="form-text">JPG, PNG veya WEBP formatında görsel yükleyiniz.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-bold">Açıklama</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" required placeholder="Saat detaylarını giriniz..."></textarea>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="featured" name="featured" value="true">
+                            <label class="form-check-label" for="featured">Ana Sayfada Göster</label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning text-white fw-bold">Ürünü Ekle</button>
+                            <a href="/products" class="btn btn-outline-secondary">İptal</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
