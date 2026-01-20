@@ -128,7 +128,10 @@ router.post('/admin/login', (req, res) => {
     password = password.trim();
 
     // Simple authentication check
-    if (username === 'admin' && password === 'admin') {
+    const adminUser = process.env.ADMIN_USERNAME || 'admin';
+    const adminPass = process.env.ADMIN_PASSWORD || 'fatih123';
+
+    if (username === adminUser && password === adminPass) {
         console.log('Login Successful');
         req.session.user = 'admin'; // Set session user
         res.redirect('/admin/dashboard');
