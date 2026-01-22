@@ -203,6 +203,37 @@ const seedDB = async () => {
                 gender: 'Unisex',
                 image: '/images/watch20.jpg',
                 description: 'Dönebilen kasa tasarımı. Art Deco klasiği.'
+            },
+            // NEWLY ADDED PRODUCTS (PERSISTENT)
+            {
+                name: 'Vertu Grand',
+                brand: 'Vertu',
+                price: 1000,
+                category: 'Luxury',
+                gender: 'Men',
+                image: '/uploads/1768858277296.webp', // Assumed mapping, user to verify
+                description: 'Exclusive luxury design.',
+                featured: true
+            },
+            {
+                name: 'Casio hdl',
+                brand: 'Casio',
+                price: 2000,
+                category: 'Sport',
+                gender: 'Men',
+                image: '/uploads/1768858702687.webp', // Assumed mapping, user to verify
+                description: 'Classic digital dependability.',
+                featured: true
+            },
+            {
+                name: 'Jaeger-LeCoultre',
+                brand: 'Jaeger-LeCoultre',
+                price: 10000,
+                category: 'Luxury',
+                gender: 'Men',
+                image: '/uploads/1768858837824.webp', // Assumed mapping, user to verify
+                description: 'Master control luxury.',
+                featured: true
             }
         ];
 
