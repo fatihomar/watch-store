@@ -53,15 +53,7 @@ const seedDB = async () => {
                 image: '/images/watch4.jpg',
                 description: 'Aya ilk çıkan saat. Tarihi miras ve modern teknoloji.'
             },
-            {
-                name: 'Hublot Big Bang',
-                brand: 'Hublot',
-                price: 18500,
-                category: 'Luxury',
-                gender: 'Men',
-                image: '/images/watch5.jpg',
-                description: 'Füzyon sanatı. Seramik ve titanyumun güçlü uyumu.'
-            },
+
 
             // WOMEN (6-10)
             {
@@ -177,15 +169,7 @@ const seedDB = async () => {
                 image: '/images/watch17.jpg',
                 description: 'Zarif ve karmaşık. İkonik tasarım.'
             },
-            {
-                name: 'Panerai Luminor',
-                brand: 'Panerai',
-                price: 6800,
-                category: 'Sport',
-                gender: 'Men',
-                image: '/images/watch18.jpg',
-                description: 'İtalyan tasarımı, İsviçre teknolojisi. Eşsiz kurma kolu koruması.'
-            },
+
             {
                 name: 'Vacheron Constantin Overseas',
                 brand: 'Vacheron Constantin',
